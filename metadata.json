@@ -1,0 +1,6 @@
+{
+  "name": "TravelPilot — Autonomous Orchestration Engine",
+  "description": "Deterministic Geo-Temporal Routing meets Autonomous DAG Disruption Recovery for executive itinerary orchestration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
