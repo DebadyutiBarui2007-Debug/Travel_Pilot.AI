@@ -119,7 +119,16 @@ Follow these steps to run TravelPilot locally on your computer (Windows, macOS, 
 - **Node.js**: v18.0.0 or higher (v20+ recommended) — verify via `node -v`
 - **npm**: v9.0.0 or higher — verify via `npm -v`
 
-### Step-by-Step Instructions:
+### ⚡ Quick Automated Setup (macOS / Linux / WSL):
+You can run the automated initialization script which handles node checks, `.env` generation, dependency installation, and type validation:
+```bash
+chmod +x setup.sh
+./setup.sh
+# Or alternatively:
+npm run setup
+```
+
+### 📋 Manual Step-by-Step Instructions:
 
 1. **Clone or Download the Repository**:
    ```bash
@@ -172,11 +181,38 @@ Follow these steps to run TravelPilot locally on your computer (Windows, macOS, 
 
 ---
 
-## 🚀 Deployment Guide
+## 🚀 Automated CI/CD Pipeline & Deployment Guide
 
-TravelPilot is built to be turnkey deployable on any Cloud container or serverless hosting provider.
+TravelPilot includes a complete GitHub Actions workflow (`.github/workflows/deploy.yml`) that triggers on every push and pull request to `main` or `master`.
+
+### 🔄 GitHub Actions Workflow Overview
+1. **Continuous Integration (`ci-build-and-test`)**:
+   - Automated checkout and setup on Node.js 20 LTS.
+   - Executes TypeScript type-checking and linting (`npm run lint`).
+   - Runs full production asset compilation (`npm run build`).
+   - Archives verified production bundles.
+2. **Automated Multi-Cloud Deployments**:
+   - **Google Cloud Run**: Builds container with Google Cloud SDK and deploys to managed Cloud Run.
+   - **AWS App Runner / ECS**: Authenticates with AWS credentials, builds Docker image, and deploys to Amazon ECR.
+   - **Vercel**: Deploys preview and production builds automatically with `@vercel/action`.
+   - **Manual Trigger Support (`workflow_dispatch`)**: Allows selective platform deployments via the GitHub Actions tab.
+
+#### 🔐 Required GitHub Secrets (Configured under Settings -> Secrets):
+| Secret Name | Description | Cloud Provider |
+| :--- | :--- | :--- |
+| `GCP_SA_KEY` | Service Account JSON Key | Google Cloud Run |
+| `GCP_PROJECT_ID` | Google Cloud Project ID | Google Cloud Run |
+| `AWS_ACCESS_KEY_ID` | IAM User Access Key | AWS App Runner / ECR |
+| `AWS_SECRET_ACCESS_KEY` | IAM User Secret Key | AWS App Runner / ECR |
+| `AWS_ACCOUNT_ID` | 12-digit AWS Account ID | AWS App Runner / ECR |
+| `VERCEL_TOKEN` | Vercel Personal Access Token | Vercel |
+| `VERCEL_ORG_ID` | Vercel Organization ID | Vercel |
+| `VERCEL_PROJECT_ID` | Vercel Project ID | Vercel |
+| `GEMINI_API_KEY` | Gemini API Key for Server-Side AI | All Providers |
 
 ---
+
+### Manual Deployment Guides
 
 ### 1. Google AI Studio (Published Link)
 If accessing TravelPilot via Google AI Studio:
@@ -211,14 +247,23 @@ gcloud run deploy travelpilot \
 
 ---
 
-### 3. AWS App Runner / ECS
+### 3. AWS Amplify & AWS App Runner / ECS
 
-#### AWS App Runner (One-Command Deployment):
+#### Option A: AWS Amplify
+1. Connect your GitHub repository in the **AWS Amplify Console**.
+2. Set Build Settings (or use `amplify.yml`):
+   - **Build Command**: `npm run build`
+   - **Base Directory**: `dist`
+3. Configure Environment Variables:
+   - `PORT`: `3000`
+   - `GEMINI_API_KEY`: your API key
+
+#### Option B: AWS App Runner (Containerized):
 1. Push your Docker image to AWS Elastic Container Registry (ECR).
 2. Create an App Runner service selecting the ECR container image.
 3. Set Environment Variable `GEMINI_API_KEY` and Port `3000`.
 
-#### AWS ECS (Elastic Container Service):
+#### Option C: AWS ECS (Elastic Container Service):
 Use the provided `Dockerfile` with Fargate launch type on Port `3000`.
 
 ---
