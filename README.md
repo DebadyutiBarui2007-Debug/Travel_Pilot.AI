@@ -113,15 +113,15 @@ High-velocity executive itineraries are fragile. A single 45-minute flight delay
 
 ## 💻 Local Development Setup (Localhost)
 
-Follow these steps to run TravelPilot locally on your computer:
+Follow these steps to run TravelPilot locally on your computer (Windows, macOS, Linux):
 
 ### Prerequisites:
-- **Node.js**: v18.0.0 or higher (v20+ recommended)
-- **npm**: v9.0.0 or higher
+- **Node.js**: v18.0.0 or higher (v20+ recommended) — verify via `node -v`
+- **npm**: v9.0.0 or higher — verify via `npm -v`
 
 ### Step-by-Step Instructions:
 
-1. **Clone the Repository**:
+1. **Clone or Download the Repository**:
    ```bash
    git clone https://github.com/your-username/travelpilot.git
    cd travelpilot
@@ -133,27 +133,42 @@ Follow these steps to run TravelPilot locally on your computer:
    ```
 
 3. **Configure Environment Variables**:
-   Copy the `.env.example` template to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-   Open `.env` and configure your settings:
+   Copy `.env.example` to `.env`:
+   - **macOS / Linux**: `cp .env.example .env`
+   - **Windows PowerShell**: `Copy-Item .env.example .env`
+   - **Windows CMD**: `copy .env.example .env`
+
+   *(Optional)* Add your Gemini API key in `.env`:
    ```env
    PORT=3000
    NODE_ENV=development
-   GEMINI_API_KEY=your_actual_gemini_api_key
+   GEMINI_API_KEY=your_gemini_api_key_here
    ```
+   *(Note: The app will run seamlessly even without an API key using built-in high-precision heuristics).*
 
-4. **Start Development Server**:
+4. **Start the Unified Full-Stack Dev Server**:
    ```bash
    npm run dev
    ```
-
-5. **Access Application**:
-   Open your browser and navigate to:
+   This launches Express + Vite together with hot reload and server-side API support on:
    ```
    http://localhost:3000
    ```
+
+5. **Test the Production Build Locally**:
+   To test the exact production bundle locally before cloud deployment:
+   ```bash
+   npm run build
+   npm start
+   ```
+
+### 🛠️ Localhost Troubleshooting:
+- **Port 3000 already in use**:
+  - macOS/Linux: `PORT=3001 npm run dev`
+  - Windows PowerShell: `$env:PORT=3001; npm run dev`
+  - Windows CMD: `set PORT=3001 && npm run dev`
+- **Node Version Mismatch**: If you are on Node 16 or older, please upgrade to Node 20 LTS using [nvm](https://github.com/nvm-sh/nvm) or from [nodejs.org](https://nodejs.org).
+- **Clean Reinstall**: If dependencies are corrupted, run `npm run clean && npm install`.
 
 ---
 

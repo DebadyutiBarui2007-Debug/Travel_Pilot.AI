@@ -1,23 +1,28 @@
+import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import path from 'path';
+import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import { initialTrip, sampleDisruptionEvent, mockUserProfile, mockActiveDevices, mockNotificationSettings, mockNotifications } from './src/data/mockData';
 import { TripItinerary, DisruptionEvent, NotificationSettings, CopilotMessage, NotificationItem } from './src/types';
 
-// Initialize Gemini Client server-side
-const apiKey = process.env.GEMINI_API_KEY || '';
-let ai: GoogleGenAI | null = null;
-
-if (apiKey) {
-  ai = new GoogleGenAI({
-    apiKey,
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
+// Lazy-loaded Gemini Client server-side
+let geminiInstance: GoogleGenAI | null = null;
+function getGeminiClient(): GoogleGenAI | null {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  if (!geminiInstance) {
+    geminiInstance = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
       },
-    },
-  });
+    });
+  }
+  return geminiInstance;
 }
 
 const app = express();
@@ -225,10 +230,12 @@ app.post('/api/copilot', async (req: Request, res: Response) => {
   let safetyMargin = '94.2%';
   let note = 'Added as Elastic Auxiliary Node';
 
-  if (ai) {
+  const gemini = getGeminiClient();
+
+  if (gemini) {
     try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
+      const response = await gemini.models.generateContent({
+        model: 'gemini-2.5-flash',
         contents: `You are TravelPilot's Autonomous Orchestration Copilot. The user is asking about their itinerary feasibility.
 Current Itinerary Nodes:
 - Flight AF/AA1204 arrival at CDG 14:15 CET (or 15:40 CET if delayed)
@@ -242,7 +249,7 @@ Provide a concise, high-agency, executive answer (under 3 sentences). State if t
       });
       answerText = response.text || '';
     } catch (err) {
-      console.error('Gemini error:', err);
+      console.error('Gemini API Error:', err);
       answerText = `Affirmative, ${userName || 'Julian'}. Request analyzed against live Mapbox distance matrices. Request is topologically feasible with 28 minutes of unencumbered slack.`;
     }
   } else {
@@ -351,15 +358,22 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
+    const distPath = path.resolve(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req: Request, res: Response) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      const indexPath = path.join(distPath, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.status(404).send('Production build not found. Please run "npm run build" first.');
+      }
     });
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`TravelPilot Engine server running on http://0.0.0.0:${PORT}`);
+    console.log(`\n✈️  TravelPilot Engine server active:`);
+    console.log(`   - Local:    http://localhost:${PORT}`);
+    console.log(`   - Network:  http://0.0.0.0:${PORT}\n`);
   });
 }
 
