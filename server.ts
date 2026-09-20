@@ -23,7 +23,7 @@ if (apiKey) {
 const app = express();
 app.use(express.json());
 
-const PORT = 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
 
 // State Store in memory for real-time synchronization
 let activeTrip: TripItinerary = JSON.parse(JSON.stringify(initialTrip));

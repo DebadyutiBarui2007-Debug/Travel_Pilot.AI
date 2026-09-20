@@ -44,10 +44,11 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-[#07090f]/95 backdrop-blur-xl border-b border-[#2a2e39]/60 shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
-      <div className="h-20 max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between gap-2 sm:gap-4 w-full">
-        {/* Logo Branding */}
+      {/* Grid Container ensuring far-right profile locking */}
+      <div className="h-20 max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 grid grid-cols-12 items-center gap-2 sm:gap-4 w-full">
+        {/* Column 1: Logo Branding (Cols 1-3) */}
         <div
-          className="flex items-center gap-3 shrink-0 cursor-pointer group"
+          className="col-span-7 sm:col-span-5 lg:col-span-3 flex items-center gap-3 cursor-pointer group shrink-0 justify-self-start"
           onClick={() => onTabChange('mission-control-dashboard')}
         >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#202532] to-[#13161f] border border-[#f59e0b] flex items-center justify-center text-[#ffc174] shadow-[0_0_15px_rgba(245,158,11,0.3)] group-hover:scale-105 transition-transform shrink-0">
@@ -62,58 +63,52 @@ export const Header: React.FC<HeaderProps> = ({
               {isMissionConfirmed ? (
                 <span className="text-[#10b981] text-[9px] font-extrabold px-1 rounded bg-[#10b981]/10 border border-[#10b981]/30">UNLOCKED</span>
               ) : (
-                <span className="text-[#f59e0b] text-[9px] font-extrabold px-1 rounded bg-[#f59e0b]/10 border border-[#10b981]/30">LOCKED</span>
+                <span className="text-[#f59e0b] text-[9px] font-extrabold px-1 rounded bg-[#f59e0b]/10 border border-[#f59e0b]/30">LOCKED</span>
               )}
             </span>
           </div>
         </div>
 
-        {/* Live Engine Status Monitors (Compact on large screens, hidden on medium) */}
-        <div className="hidden 2xl:flex items-center gap-3 px-3.5 py-1.5 bg-[#13161f]/80 border border-[#2a2e39]/50 rounded-full shadow-inner shrink-0">
-          <div className="flex items-center gap-2 px-1.5 py-0.5">
-            <span className="w-2 h-2 rounded-full bg-[#7bd0ff] animate-pulse"></span>
-            <span className="font-telemetry text-xs text-[#b8a896]">DAG Engine:</span>
-            <span className="font-telemetry text-xs text-[#7bd0ff] font-semibold">{telemetry.dagCollisions} Collisions</span>
+        {/* Column 2: Center Navigation Tabs & Live Telemetry (Cols 4-9) */}
+        <div className="hidden lg:flex col-span-6 lg:col-span-6 xl:col-span-6 items-center justify-center gap-3 justify-self-center overflow-hidden w-full">
+          {/* Live Engine Status Badge */}
+          <div className="hidden 2xl:flex items-center gap-2.5 px-3 py-1 bg-[#13161f]/80 border border-[#2a2e39]/50 rounded-full shadow-inner shrink-0 text-xs font-telemetry">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#7bd0ff] animate-pulse"></span>
+              <span className="text-[#7bd0ff] font-semibold">{telemetry.dagCollisions} Collisions</span>
+            </div>
+            <div className="w-px h-3 bg-[#2a2e39]"></div>
+            <div className="text-[#ffc258] font-semibold">{telemetry.syncDelayMs}ms</div>
           </div>
-          <div className="w-px h-3 bg-[#2a2e39]"></div>
-          <div className="flex items-center gap-2 px-1.5 py-0.5">
-            <span className="font-telemetry text-xs text-[#b8a896]">Sync:</span>
-            <span className="font-telemetry text-xs text-[#ffc258] font-semibold">{telemetry.syncDelayMs}ms</span>
-          </div>
-          <div className="w-px h-3 bg-[#2a2e39]"></div>
-          <div className="flex items-center gap-2 px-1.5 py-0.5">
-            <span className="font-telemetry text-xs text-[#b8a896]">Solver:</span>
-            <span className="font-telemetry text-xs text-[#ffc174] font-semibold">{telemetry.twvrpStatus}</span>
-          </div>
+
+          {/* Navigation Bar */}
+          <nav className="flex items-center gap-1 bg-[#13161f]/90 p-1 border border-[#2a2e39]/40 rounded-xl overflow-x-auto shrink max-w-full">
+            {tabs.map((tab) => {
+              const isLocked = !isMissionConfirmed && tab.id !== 'mission-control-dashboard';
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabClick(tab.id, tab.label)}
+                  className={`px-3 py-1.5 rounded-lg font-sans text-xs transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? 'bg-[#f59e0b] text-[#3d2400] font-bold shadow-sm'
+                      : isLocked
+                      ? 'text-[#b8a896]/60 hover:text-[#b8a896] hover:bg-[#181c26]'
+                      : 'text-[#b8a896] hover:text-[#e1e2ec] hover:bg-[#202532]'
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  {isLocked && (
+                    <span className="material-symbols-outlined text-xs text-[#f59e0b]">lock</span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Desktop Navigation Bar */}
-        <nav className="hidden lg:flex items-center gap-1 bg-[#13161f]/90 p-1 border border-[#2a2e39]/40 rounded-xl max-w-full overflow-x-auto shrink">
-          {tabs.map((tab) => {
-            const isLocked = !isMissionConfirmed && tab.id !== 'mission-control-dashboard';
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleTabClick(tab.id, tab.label)}
-                className={`px-3 py-1.5 rounded-lg font-sans text-xs transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? 'bg-[#f59e0b] text-[#3d2400] font-bold shadow-sm'
-                    : isLocked
-                    ? 'text-[#b8a896]/60 hover:text-[#b8a896] hover:bg-[#181c26]'
-                    : 'text-[#b8a896] hover:text-[#e1e2ec] hover:bg-[#202532]'
-                }`}
-              >
-                <span>{tab.label}</span>
-                {isLocked && (
-                  <span className="material-symbols-outlined text-xs text-[#f59e0b]">lock</span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Right Actions: Notifications, User Profile & Mobile Toggle */}
-        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 ml-auto">
+        {/* Column 3: Far-Right Fixed Actions & Profile Button (Cols 10-12) */}
+        <div className="col-span-5 sm:col-span-7 lg:col-span-3 flex items-center justify-end gap-2 sm:gap-3 justify-self-end shrink-0">
           {/* Notification Trigger Button */}
           <button
             onClick={onOpenNotifications}
@@ -128,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </button>
 
-          {/* User Profile Button - FIXED & PROMINENTLY ACCESSIBLE */}
+          {/* User Profile Button - FIXED TO FAR RIGHT CORNER */}
           <button
             onClick={onOpenAuth}
             className="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-[#13161f] border border-[#2a2e39]/70 hover:border-[#f59e0b]/60 hover:bg-[#181c26] transition-all cursor-pointer shrink-0 shadow-sm"
@@ -178,7 +173,7 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <span>{tab.label}</span>
                 {isLocked && (
-                  <span className="material-symbols-outlined text-sm text-[#f59e0b]">lock</span>
+                  <span className="material-symbols-outlined text-xs text-[#f59e0b]">lock</span>
                 )}
               </button>
             );
@@ -188,4 +183,3 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
-
