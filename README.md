@@ -181,38 +181,11 @@ npm run setup
 
 ---
 
-## 🚀 Automated CI/CD Pipeline & Deployment Guide
+## 🚀 Deployment Guide
 
-TravelPilot includes a complete GitHub Actions workflow (`.github/workflows/deploy.yml`) that triggers on every push and pull request to `main` or `master`.
-
-### 🔄 GitHub Actions Workflow Overview
-1. **Continuous Integration (`ci-build-and-test`)**:
-   - Automated checkout and setup on Node.js 20 LTS.
-   - Executes TypeScript type-checking and linting (`npm run lint`).
-   - Runs full production asset compilation (`npm run build`).
-   - Archives verified production bundles.
-2. **Automated Multi-Cloud Deployments**:
-   - **Google Cloud Run**: Builds container with Google Cloud SDK and deploys to managed Cloud Run.
-   - **AWS App Runner / ECS**: Authenticates with AWS credentials, builds Docker image, and deploys to Amazon ECR.
-   - **Vercel**: Deploys preview and production builds automatically with `@vercel/action`.
-   - **Manual Trigger Support (`workflow_dispatch`)**: Allows selective platform deployments via the GitHub Actions tab.
-
-#### 🔐 Required GitHub Secrets (Configured under Settings -> Secrets):
-| Secret Name | Description | Cloud Provider |
-| :--- | :--- | :--- |
-| `GCP_SA_KEY` | Service Account JSON Key | Google Cloud Run |
-| `GCP_PROJECT_ID` | Google Cloud Project ID | Google Cloud Run |
-| `AWS_ACCESS_KEY_ID` | IAM User Access Key | AWS App Runner / ECR |
-| `AWS_SECRET_ACCESS_KEY` | IAM User Secret Key | AWS App Runner / ECR |
-| `AWS_ACCOUNT_ID` | 12-digit AWS Account ID | AWS App Runner / ECR |
-| `VERCEL_TOKEN` | Vercel Personal Access Token | Vercel |
-| `VERCEL_ORG_ID` | Vercel Organization ID | Vercel |
-| `VERCEL_PROJECT_ID` | Vercel Project ID | Vercel |
-| `GEMINI_API_KEY` | Gemini API Key for Server-Side AI | All Providers |
+TravelPilot is built to be turnkey deployable on any Cloud container or serverless hosting provider.
 
 ---
-
-### Manual Deployment Guides
 
 ### 1. Google AI Studio (Published Link)
 If accessing TravelPilot via Google AI Studio:
